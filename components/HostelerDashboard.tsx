@@ -93,17 +93,17 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-gray-900">Hosteler Dashboard</h2>
-          <p className="text-gray-500">Manage your campus requests</p>
+          <h2 className="text-3xl font-black text-gray-900 tracking-tight">Hosteler Dashboard</h2>
+          <p className="text-gray-500 font-medium">Manage your campus requests on UNEEDS</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="bg-white border px-4 py-2 rounded-xl text-sm font-bold">
-            <span className="text-gray-400 mr-2">Wallet:</span>
-            <span className="text-indigo-600">₹{user.walletBalance.toFixed(2)}</span>
+          <div className="bg-white border-2 border-indigo-50 px-5 py-2.5 rounded-2xl text-sm font-black shadow-sm">
+            <span className="text-gray-400 mr-2 uppercase tracking-tighter">Wallet:</span>
+            <span className="text-indigo-900">₹{user.walletBalance.toFixed(2)}</span>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
+            className="bg-indigo-900 text-white px-8 py-3.5 rounded-2xl font-black flex items-center gap-2 hover:bg-indigo-800 transition shadow-xl shadow-indigo-100 active:scale-95"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
             Raise New Ticket
@@ -112,31 +112,34 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-semibold text-gray-500 mb-1">Active Requests</p>
-          <p className="text-2xl font-bold text-indigo-600">{myRequests.filter(r => r.status !== RequestStatus.COMPLETED).length}</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
+          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Active Requests</p>
+          <p className="text-4xl font-black text-indigo-900 tracking-tighter">{myRequests.filter(r => r.status !== RequestStatus.COMPLETED).length}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-semibold text-gray-500 mb-1">Total Spent</p>
-          <p className="text-2xl font-bold text-gray-900">₹{myRequests.reduce((sum, r) => sum + r.totalAmount, 0)}</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
+          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Spent</p>
+          <p className="text-4xl font-black text-gray-900 tracking-tighter">₹{myRequests.reduce((sum, r) => sum + r.totalAmount, 0)}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-semibold text-gray-500 mb-1">In Escrow</p>
-          <p className="text-2xl font-bold text-amber-600">₹{myRequests.filter(r => r.status !== RequestStatus.COMPLETED && r.status !== RequestStatus.CANCELLED).reduce((sum, r) => sum + r.totalAmount, 0)}</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
+          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">In Escrow</p>
+          <p className="text-4xl font-black text-orange-500 tracking-tighter">₹{myRequests.filter(r => r.status !== RequestStatus.COMPLETED && r.status !== RequestStatus.CANCELLED).reduce((sum, r) => sum + r.totalAmount, 0)}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b bg-gray-50/50">
-          <h3 className="font-bold text-xl">My Requests</h3>
+      <div className="bg-white rounded-[2.5rem] border border-gray-50 shadow-sm overflow-hidden">
+        <div className="p-8 border-b bg-gray-50/50">
+          <h3 className="font-black text-2xl tracking-tight">My Active Logistics</h3>
         </div>
-        <div className="p-6">
+        <div className="p-8">
           {myRequests.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 font-medium italic">You haven't raised any tickets yet.</p>
+            <div className="text-center py-20">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <svg className="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              </div>
+              <p className="text-gray-400 font-bold italic">You haven't raised any delivery tickets yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {myRequests.map(req => (
                 <RequestCard key={req.id} request={req} role={user.role} />
               ))}
@@ -146,27 +149,27 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl my-auto">
-            <div className="p-6 border-b flex justify-between items-center bg-indigo-600 text-white rounded-t-3xl sticky top-0">
-              <h3 className="text-xl font-bold">Raise New Delivery Ticket</h3>
-              <button onClick={() => setIsModalOpen(false)} className="hover:bg-indigo-500 p-2 rounded-lg transition">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b flex justify-between items-center bg-indigo-900 text-white rounded-t-[2.5rem] sticky top-0">
+              <h3 className="text-2xl font-black tracking-tight">New Delivery Ticket</h3>
+              <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/10 p-3 rounded-2xl transition">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+            <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[70vh] overflow-y-auto">
               {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold border border-red-100">
+                <div className="bg-red-50 text-red-600 p-5 rounded-2xl text-xs font-black border border-red-100 uppercase tracking-widest">
                   {error}
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Number of unique items?</label>
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Unique items count?</label>
                 <input 
                   type="number" 
                   min="1" max="10"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-indigo-500 transition"
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                   value={numItems}
                   onChange={e => handleNumItemsChange(parseInt(e.target.value))}
                 />
@@ -174,30 +177,30 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
 
               <div className="space-y-4">
                 {itemsList.map((itm, idx) => (
-                  <div key={idx} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="md:col-span-1">
-                      <label className="block text-xs font-bold text-gray-500 mb-1">Item {idx + 1}</label>
+                  <div key={idx} className="p-6 bg-gray-50 rounded-3xl border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-1 space-y-1">
+                      <label className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Item {idx + 1}</label>
                       <input 
                         required type="text" placeholder="Item Name"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl border border-transparent focus:border-uneeds-u bg-white text-sm font-medium outline-none transition"
                         value={itm.name}
                         onChange={e => updateItem(idx, 'name', e.target.value)}
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1">Qty</label>
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Qty</label>
                       <input 
                         required type="number" min="1"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl border border-transparent focus:border-uneeds-u bg-white text-sm font-medium outline-none transition"
                         value={itm.quantity}
                         onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value))}
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1">Est. Price/Unit</label>
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Est. Price</label>
                       <input 
                         required type="number" min="0"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl border border-transparent focus:border-uneeds-u bg-white text-sm font-medium outline-none transition"
                         value={itm.estimatedPrice}
                         onChange={e => updateItem(idx, 'estimatedPrice', parseFloat(e.target.value))}
                       />
@@ -206,52 +209,52 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
                 ))}
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Tip for Day Scholar (₹)</label>
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Delivery Tip (₹)</label>
                 <input 
                   type="number" 
                   min="0"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                   value={tip}
                   onChange={e => setTip(parseFloat(e.target.value) || 0)}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Instructions / Notes</label>
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Instructions</label>
                 <textarea 
                   rows={2}
-                  placeholder="Extra info for the day scholar..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                  placeholder="Mention delivery specifics or landmark..."
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                 />
               </div>
 
-              <div className="bg-indigo-50 p-6 rounded-2xl space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Items Total</span>
-                  <span className="font-bold">₹{baseAmount}</span>
+              <div className="bg-indigo-50/50 p-8 rounded-[2rem] border border-indigo-100 space-y-4">
+                <div className="flex justify-between text-sm font-bold text-indigo-900">
+                  <span className="opacity-60">Estimated Base Cost</span>
+                  <span>₹{baseAmount}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Platform Fee (10%)</span>
+                <div className="flex justify-between text-sm font-bold text-indigo-900">
+                  <span className="opacity-60">Service Charge (10%)</span>
                   <span>₹{serviceCharge}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Tip</span>
+                <div className="flex justify-between text-sm font-bold text-indigo-900">
+                  <span className="opacity-60">Incentive Tip</span>
                   <span>₹{tip}</span>
                 </div>
-                <div className="flex justify-between text-sm pt-2 border-t border-indigo-100">
-                  <span>Total Amount</span>
-                  <span className="font-bold text-indigo-900 text-lg">₹{totalAmount}</span>
+                <div className="flex justify-between text-xl font-black text-indigo-900 pt-4 border-t border-indigo-200">
+                  <span>Grand Total</span>
+                  <span>₹{totalAmount}</span>
                 </div>
               </div>
 
               <button 
                 type="submit"
-                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition"
+                className="w-full py-5 bg-indigo-900 text-white rounded-2xl font-black text-lg hover:bg-indigo-800 transition shadow-2xl shadow-indigo-100 active:scale-95"
               >
-                Confirm & Pay (₹{totalAmount})
+                Release to Escrow (₹{totalAmount})
               </button>
             </form>
           </div>

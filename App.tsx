@@ -9,7 +9,7 @@ import DayScholarDashboard from './components/DayScholarDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import RequestDetails from './components/RequestDetails';
 import ProfilePage from './components/ProfilePage';
-import { User, UserRole, DeliveryRequest, ChatMessage, RequestStatus, Transaction, TransactionType } from './types';
+import { User, UserRole, DeliveryRequest, ChatMessage, RequestStatus, Transaction, TransactionType, AdminAlert } from './types';
 import { mockRequests } from './mockData';
 
 const App: React.FC = () => {
@@ -47,6 +47,11 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [adminAlerts, setAdminAlerts] = useState<AdminAlert[]>(() => {
+    const saved = localStorage.getItem('admin_alerts');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // Sync state to local storage
   useEffect(() => {
     localStorage.setItem('app_users', JSON.stringify(allUsers));
@@ -68,6 +73,10 @@ const App: React.FC = () => {
     localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
 
+  useEffect(() => {
+    localStorage.setItem('admin_alerts', JSON.stringify(adminAlerts));
+  }, [adminAlerts]);
+
   const addTransaction = (userId: string, type: TransactionType, amount: number, description: string) => {
     const newTx: Transaction = {
       id: 'tx-' + Math.random().toString(36).substr(2, 9),
@@ -78,6 +87,17 @@ const App: React.FC = () => {
       timestamp: new Date().toISOString()
     };
     setTransactions(prev => [newTx, ...prev]);
+  };
+
+  const addAdminAlert = (requestId: string, message: string) => {
+    const newAlert: AdminAlert = {
+      id: 'alert-' + Math.random().toString(36).substr(2, 9),
+      requestId,
+      message,
+      timestamp: new Date().toISOString(),
+      isRead: false
+    };
+    setAdminAlerts(prev => [newAlert, ...prev]);
   };
 
   const handleLogin = (user: User) => {
@@ -97,6 +117,11 @@ const App: React.FC = () => {
     const oldRequest = requests.find(r => r.id === updated.id);
     if (!oldRequest) return;
 
+    // Detect status change to DISPUTED
+    if (oldRequest.status !== RequestStatus.DISPUTED && updated.status === RequestStatus.DISPUTED) {
+      addAdminAlert(updated.id, `A new dispute has been raised for Order #${updated.id} by ${updated.hostelerName}.`);
+    }
+
     // Trigger payout only when transitioning to COMPLETED and if not already paid
     if (oldRequest.status !== RequestStatus.COMPLETED && updated.status === RequestStatus.COMPLETED && !updated.paymentReleased) {
       processPayout(updated);
@@ -115,16 +140,12 @@ const App: React.FC = () => {
   const processPayout = (req: DeliveryRequest) => {
     if (!req.dayScholarId) return;
 
-    // Distribution:
-    // Scholar: Base + Tip + (80% of Service Charge)
-    // Admin: (20% of Service Charge)
     const scholarShare = req.baseAmount + req.tip + (req.serviceCharge * 0.8);
     const adminShare = req.serviceCharge * 0.2;
 
     const firstAdmin = allUsers.find(u => u.role === UserRole.ADMIN);
 
     setAllUsers(prev => prev.map(u => {
-      // Payout Scholar
       if (u.id === req.dayScholarId) {
         addTransaction(u.id, 'earning', scholarShare, `Earnings from Order #${req.id}`);
         return {
@@ -133,7 +154,6 @@ const App: React.FC = () => {
           totalEarnings: (u.totalEarnings || 0) + scholarShare
         };
       }
-      // Payout Admin
       if (u.role === UserRole.ADMIN && (!firstAdmin || u.id === firstAdmin.id)) {
         addTransaction(u.id, 'earning', adminShare, `Platform fee share from Order #${req.id}`);
         return {
@@ -145,7 +165,6 @@ const App: React.FC = () => {
       return u;
     }));
 
-    // Local state sync for active user
     if (currentUser?.id === req.dayScholarId) {
        setCurrentUser(prev => prev ? { ...prev, walletBalance: prev.walletBalance + scholarShare, totalEarnings: (prev.totalEarnings || 0) + scholarShare } : null);
     } else if (currentUser?.role === UserRole.ADMIN && (!firstAdmin || currentUser.id === firstAdmin.id)) {
@@ -167,10 +186,17 @@ const App: React.FC = () => {
       return u;
     }));
 
-    // Sync current user if they are the hosteler
     if (currentUser?.id === req.hostelerId) {
       setCurrentUser(prev => prev ? { ...prev, walletBalance: prev.walletBalance + refundAmount } : null);
     }
+  };
+
+  const clearAdminAlerts = () => {
+    setAdminAlerts([]);
+  };
+
+  const dismissAdminAlert = (alertId: string) => {
+    setAdminAlerts(prev => prev.filter(a => a.id !== alertId));
   };
 
   const addRequest = (req: DeliveryRequest) => {
@@ -230,6 +256,7 @@ const App: React.FC = () => {
                     user={currentUser} 
                     requests={requests} 
                     onAddRequest={addRequest} 
+                    // Correcting misspelled function name from updateProfile to updateUserProfile
                     onUpdateProfile={updateUserProfile} 
                   />
                 ) :
@@ -241,7 +268,16 @@ const App: React.FC = () => {
                     onUpdateProfile={updateUserProfile}
                   />
                 ) :
-                <AdminDashboard user={currentUser} requests={requests} allUsers={allUsers} onUpdateRequest={updateRequest} />
+                <AdminDashboard 
+                  user={currentUser} 
+                  requests={requests} 
+                  allUsers={allUsers} 
+                  onUpdateRequest={updateRequest} 
+                  alerts={adminAlerts}
+                  transactions={transactions}
+                  onClearAlerts={clearAdminAlerts}
+                  onDismissAlert={dismissAdminAlert}
+                />
               }
             />
 
@@ -270,7 +306,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
         <footer className="bg-white border-t py-6 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} YOU NEEDS - Empowering Campus Connections
+          &copy; {new Date().getFullYear()} UNEEDS - WE SERVE
         </footer>
       </div>
     </HashRouter>

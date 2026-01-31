@@ -33,9 +33,15 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [isSaved, setIsSaved] = useState(false);
   const [historyTab, setHistoryTab] = useState<'all' | 'hosteler' | 'scholar'>('all');
+  const [txFilter, setTxFilter] = useState<'all' | 'deposit' | 'earning' | 'payment' | 'refund'>('all');
 
   // Filter transactions for this user
   const userTransactions = transactions.filter(tx => tx.userId === user.id);
+  const filteredTransactions = userTransactions.filter(tx => txFilter === 'all' || tx.type === txFilter);
+
+  // Financial Stats
+  const totalEarned = userTransactions.filter(tx => tx.type === 'earning').reduce((acc, curr) => acc + curr.amount, 0);
+  const totalSpent = userTransactions.filter(tx => tx.type === 'payment').reduce((acc, curr) => acc + curr.amount, 0);
 
   // Filter requests for order history
   const sentRequests = requests.filter(r => r.hostelerId === user.id);
@@ -84,6 +90,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
       case 'earning': return { bg: 'bg-indigo-50', text: 'text-indigo-700', iconColor: 'text-indigo-500', sign: '+' };
       case 'withdrawal': return { bg: 'bg-rose-50', text: 'text-rose-700', iconColor: 'text-rose-500', sign: '-' };
       case 'payment': return { bg: 'bg-amber-50', text: 'text-amber-700', iconColor: 'text-amber-500', sign: '-' };
+      case 'refund': return { bg: 'bg-blue-50', text: 'text-blue-700', iconColor: 'text-blue-500', sign: '+' };
       default: return { bg: 'bg-gray-50', text: 'text-gray-700', iconColor: 'text-gray-500', sign: '' };
     }
   };
@@ -110,18 +117,29 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
           </svg>
           Back to Dashboard
         </button>
-        <h2 className="text-2xl font-extrabold text-gray-900">Account Settings</h2>
+        <h2 className="text-2xl font-extrabold text-gray-900">Wallet & Settings</h2>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left Column: Wallet & Notifications */}
+        {/* Left Column: Enhanced Wallet Stats & Notifications */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Wallet Card */}
+          {/* Enhanced Wallet Card */}
           <div className="bg-white rounded-[2rem] border border-gray-100 shadow-xl overflow-hidden group">
             <div className="bg-indigo-600 p-8 text-white relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
               <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Current Balance</p>
               <h3 className="text-4xl font-black relative z-10">₹{user.walletBalance.toFixed(2)}</h3>
+              
+              <div className="mt-6 grid grid-cols-2 gap-4 relative z-10">
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl">
+                  <p className="text-[10px] font-bold text-indigo-100 uppercase mb-0.5">Total Earned</p>
+                  <p className="text-sm font-black">₹{totalEarned.toFixed(2)}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl">
+                  <p className="text-[10px] font-bold text-indigo-100 uppercase mb-0.5">Total Spent</p>
+                  <p className="text-sm font-black">₹{totalSpent.toFixed(2)}</p>
+                </div>
+              </div>
             </div>
             
             <div className="p-8 space-y-4">
@@ -155,36 +173,114 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
             </div>
           </div>
 
-          {/* Transaction History Card */}
-          <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b bg-gray-50/50 flex justify-between items-center">
-              <h4 className="font-bold text-gray-800">Recent Transactions</h4>
-              <span className="text-[10px] font-bold text-gray-400 uppercase">{userTransactions.length} Total</span>
+          {/* Notification Preferences Card */}
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              Notification Alerts
+            </h4>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">New Order Alerts</p>
+                  <p className="text-[10px] text-gray-500">Get notified of new campus requests</p>
+                </div>
+                <button 
+                  onClick={() => toggleNotif('newOrders')}
+                  className={`w-11 h-6 flex items-center rounded-full transition-colors ${notifs.newOrders ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform mx-1 ${notifs.newOrders ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">In-App Messages</p>
+                  <p className="text-[10px] text-gray-500">Alerts for new chat messages</p>
+                </div>
+                <button 
+                  onClick={() => toggleNotif('messages')}
+                  className={`w-11 h-6 flex items-center rounded-full transition-colors ${notifs.messages ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform mx-1 ${notifs.messages ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Status Updates</p>
+                  <p className="text-[10px] text-gray-500">Notifications on delivery progress</p>
+                </div>
+                <button 
+                  onClick={() => toggleNotif('statusUpdates')}
+                  className={`w-11 h-6 flex items-center rounded-full transition-colors ${notifs.statusUpdates ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform mx-1 ${notifs.statusUpdates ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
             </div>
-            <div className="max-h-[400px] overflow-y-auto">
-              {userTransactions.length === 0 ? (
-                <div className="p-10 text-center text-gray-400 text-sm italic">
-                  No transaction history yet.
+          </div>
+        </div>
+
+        {/* Right Column: Transaction History & Account Info */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Enhanced Transaction History Section */}
+          <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h4 className="font-bold text-xl text-gray-800">Transaction History</h4>
+                <p className="text-xs text-gray-500">Track all your financial movements on YOU NEEDS</p>
+              </div>
+              <div className="flex items-center bg-gray-200 p-1 rounded-xl w-full sm:w-auto overflow-x-auto whitespace-nowrap">
+                {['all', 'deposit', 'earning', 'payment', 'refund'].map((type) => (
+                  <button 
+                    key={type}
+                    onClick={() => setTxFilter(type as any)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition ${txFilter === type ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500'}`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="max-h-[500px] overflow-y-auto">
+              {filteredTransactions.length === 0 ? (
+                <div className="p-20 text-center">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3-3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-400 font-medium italic">No transactions found matching your filter.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-50">
-                  {userTransactions.map(tx => {
+                  {filteredTransactions.map(tx => {
                     const style = getTxTypeStyles(tx.type);
                     return (
-                      <div key={tx.id} className="p-4 hover:bg-gray-50/50 transition-colors flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full ${style.bg} flex items-center justify-center flex-shrink-0`}>
-                          <svg className={`w-5 h-5 ${style.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div key={tx.id} className="p-6 hover:bg-gray-50/50 transition-colors flex items-center gap-6">
+                        <div className={`w-12 h-12 rounded-2xl ${style.bg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                          <svg className={`w-6 h-6 ${style.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             {tx.type === 'deposit' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />}
                             {tx.type === 'withdrawal' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />}
                             {tx.type === 'earning' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
-                            {tx.type === 'payment' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />}
+                            {tx.type === 'payment' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />}
+                            {tx.type === 'refund' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-6m0 0l-3 3m3-3l3 3m-9 0h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
                           </svg>
                         </div>
                         <div className="flex-grow min-w-0">
-                          <p className="text-xs font-bold text-gray-800 truncate">{tx.description}</p>
-                          <p className="text-[10px] text-gray-400">{new Date(tx.timestamp).toLocaleDateString()} • {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                          <p className="text-sm font-bold text-gray-800 truncate">{tx.description}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${style.bg} ${style.text}`}>{tx.type}</span>
+                            <span className="text-[10px] text-gray-400 font-medium">
+                              {new Date(tx.timestamp).toLocaleDateString()} at {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
                         </div>
-                        <div className={`text-right font-black text-sm ${style.text}`}>
+                        <div className={`text-right font-black text-lg ${style.text}`}>
                           {style.sign}₹{tx.amount.toFixed(2)}
                         </div>
                       </div>
@@ -194,10 +290,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
               )}
             </div>
           </div>
-        </div>
 
-        {/* Right Column: Profile Form & Order History */}
-        <div className="lg:col-span-2 space-y-8">
           {/* Profile Form Card */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-8 border-b flex items-center gap-6 bg-gray-50/50">
@@ -274,30 +367,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-gray-700">Branch</label>
-                  <input 
-                    type="text"
-                    name="branch"
-                    value={formData.branch}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-gray-700">Section</label>
-                  <input 
-                    type="text"
-                    name="section"
-                    value={formData.section}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
-                    required
-                  />
-                </div>
               </div>
 
               <div className="pt-6 border-t border-gray-100 flex justify-end">
@@ -305,13 +374,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, transactions, requests,
                   type="submit"
                   className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition active:scale-95"
                 >
-                  Save All Changes
+                  Save Profile Changes
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Categorized Order History Section */}
+          {/* Categorized Order History Section (Below Profile Info) */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-8 border-b bg-gray-50/50">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

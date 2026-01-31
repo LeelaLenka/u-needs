@@ -23,75 +23,76 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ user, onComplete }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-indigo-100">
-      <div className="bg-indigo-600 p-8 text-white">
-        <h2 className="text-2xl font-bold mb-2">Complete Your Profile</h2>
-        <p className="text-indigo-100">To start using YOU NEEDS, please provide your campus details first.</p>
+    <div className="max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-50">
+      <div className="bg-indigo-900 p-10 text-white relative">
+        <div className="absolute top-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mt-12"></div>
+        <h2 className="text-3xl font-black mb-2 tracking-tight">Setup Your Profile</h2>
+        <p className="text-indigo-200 font-medium">To join the UNEEDS network, please verify your campus identity.</p>
       </div>
-      <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
-          <input type="text" disabled className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-500" value={user.fullName} />
+      <form onSubmit={handleSubmit} className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+          <input type="text" disabled className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent text-gray-400 font-medium" value={user.fullName} />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Email ID</label>
-          <input type="text" disabled className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-500" value={user.email} />
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Email ID</label>
+          <input type="text" disabled className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent text-gray-400 font-medium" value={user.email} />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
           <input 
             required type="tel" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none" 
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium" 
             placeholder="+91 00000 00000"
             value={formData.phoneNumber}
             onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">College Name</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">College Name</label>
           <input 
             required type="text" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none" 
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium" 
             placeholder="e.g. VIT University"
             value={formData.college}
             onChange={e => setFormData({...formData, college: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Registration Number</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Registration No.</label>
           <input 
             required type="text" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none" 
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium font-mono" 
             placeholder="e.g. 21BCE0001"
             value={formData.registrationNumber}
             onChange={e => setFormData({...formData, registrationNumber: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Branch</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Branch</label>
           <input 
             required type="text" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none" 
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium" 
             placeholder="e.g. CSE"
             value={formData.branch}
             onChange={e => setFormData({...formData, branch: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Section</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Section</label>
           <input 
             required type="text" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none" 
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium" 
             placeholder="e.g. A"
             value={formData.section}
             onChange={e => setFormData({...formData, section: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Year</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Year</label>
           <select 
             required 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none"
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium appearance-none"
             value={formData.year}
             onChange={e => setFormData({...formData, year: e.target.value})}
           >
@@ -102,9 +103,9 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ user, onComplete }) => {
             <option value="4">4th Year</option>
           </select>
         </div>
-        <div className="md:col-span-2 pt-4">
-          <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition">
-            Save Profile & Continue
+        <div className="md:col-span-2 pt-6">
+          <button type="submit" className="w-full py-5 bg-indigo-900 text-white rounded-2xl font-black text-lg hover:bg-indigo-800 shadow-2xl shadow-indigo-100 transition active:scale-95">
+            Complete Profile
           </button>
         </div>
       </form>

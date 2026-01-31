@@ -33,6 +33,14 @@ export interface Transaction {
   timestamp: string;
 }
 
+export interface AdminAlert {
+  id: string;
+  requestId: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 export interface User {
   id: string;
   userName: string;

@@ -96,38 +96,39 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, allUsers }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-      <div className="bg-indigo-600 p-8 text-white">
-        <h2 className="text-3xl font-bold mb-2">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
-        <p className="text-indigo-100">{mode === 'login' ? 'Sign in to access your campus dashboard' : 'Join your campus delivery community today'}</p>
+    <div className="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-50 mt-10">
+      <div className="bg-indigo-900 p-10 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+        <h2 className="text-4xl font-black mb-2 tracking-tight">{mode === 'login' ? 'Welcome' : 'Join UNEEDS'}</h2>
+        <p className="text-indigo-200 text-sm font-medium">{mode === 'login' ? 'Sign in to your campus account' : 'Start your journey with campus assistance'}</p>
       </div>
       
-      <form onSubmit={handleSubmit} className="p-8 space-y-4">
+      <form onSubmit={handleSubmit} className="p-10 space-y-6">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-medium border border-red-100">
+          <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold border border-red-100 animate-pulse">
             {error}
           </div>
         )}
 
         {mode === 'register' && (
           <>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">User Name</label>
+            <div className="space-y-1">
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">User Name</label>
               <input 
                 required
                 type="text" 
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
+                className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                 placeholder="e.g. john_doe"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
+            <div className="space-y-1">
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
               <input 
                 required
                 type="text" 
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
+                className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -136,24 +137,24 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, allUsers }) => {
           </>
         )}
 
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">College Email</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">College Email</label>
           <input 
             required
             type="email" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
             placeholder="yourname@college.edu.in"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Password</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
           <input 
             required
             type="password" 
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
+            className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -162,40 +163,33 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, allUsers }) => {
 
         {mode === 'register' && (
           <>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Confirm Password</label>
+            <div className="space-y-1">
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Confirm Password</label>
               <input 
                 required
                 type="password" 
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 outline-none transition"
+                className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Choose your role</label>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">I am a...</label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setRole(UserRole.HOSTELER)}
-                  className={`py-3 rounded-xl border font-bold text-[11px] uppercase transition ${role === UserRole.HOSTELER ? 'bg-indigo-50 border-indigo-600 text-indigo-600' : 'bg-white border-gray-200 text-gray-500'}`}
+                  className={`py-3.5 rounded-2xl border-2 font-black text-[10px] uppercase tracking-tighter transition ${role === UserRole.HOSTELER ? 'bg-indigo-50 border-indigo-900 text-indigo-900 shadow-sm' : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'}`}
                 >
                   Hosteler
                 </button>
                 <button
                   type="button"
                   onClick={() => setRole(UserRole.DAY_SCHOLAR)}
-                  className={`py-3 rounded-xl border font-bold text-[11px] uppercase transition ${role === UserRole.DAY_SCHOLAR ? 'bg-indigo-50 border-indigo-600 text-indigo-600' : 'bg-white border-gray-200 text-gray-500'}`}
+                  className={`py-3.5 rounded-2xl border-2 font-black text-[10px] uppercase tracking-tighter transition ${role === UserRole.DAY_SCHOLAR ? 'bg-indigo-50 border-indigo-900 text-indigo-900 shadow-sm' : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'}`}
                 >
                   Scholar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole(UserRole.ADMIN)}
-                  className={`py-3 rounded-xl border font-bold text-[11px] uppercase transition ${role === UserRole.ADMIN ? 'bg-indigo-50 border-indigo-600 text-indigo-600' : 'bg-white border-gray-200 text-gray-500'}`}
-                >
-                  Admin
                 </button>
               </div>
             </div>
@@ -204,7 +198,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, allUsers }) => {
 
         <button 
           type="submit"
-          className="w-full mt-4 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
+          className="w-full mt-4 py-4.5 bg-indigo-900 text-white rounded-2xl font-black text-lg hover:bg-indigo-800 transition shadow-xl shadow-indigo-100 active:scale-95"
         >
           {mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
@@ -213,9 +207,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, allUsers }) => {
           <button 
             type="button"
             onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-            className="text-gray-500 text-sm hover:text-indigo-600 font-medium"
+            className="text-gray-400 text-sm hover:text-uneeds-u font-bold transition"
           >
-            {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            {mode === 'login' ? "New here? Join UNEEDS" : "Back to sign in"}
           </button>
         </div>
       </form>
