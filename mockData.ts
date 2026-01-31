@@ -31,8 +31,10 @@ export const mockRequests: DeliveryRequest[] = [
     tip: 10,
     totalAmount: 208,
     status: RequestStatus.ACCEPTED,
-    dayScholarId: 'user-4',
-    dayScholarName: 'Amit Verma',
+    // Fix: Changed dayScholarId to campusHelperId to match DeliveryRequest type definition
+    campusHelperId: 'user-4',
+    // Fix: Changed dayScholarName to campusHelperName to match DeliveryRequest type definition
+    campusHelperName: 'Amit Verma',
     otp: '5678',
     createdAt: new Date().toISOString(),
     location: { lat: 17.4495, lng: 78.3900, address: 'Girls Hostel, Main Gate' }

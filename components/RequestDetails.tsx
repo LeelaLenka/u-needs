@@ -17,77 +17,82 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ user, allUsers, request
   const { id } = useParams();
   const navigate = useNavigate();
   const request = requests.find(r => r.id === id);
-  const [enteredOtp, setEnteredOtp] = useState('');
-  const [error, setError] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpError, setOtpError] = useState(false);
+  const [rating, setRating] = useState(0);
 
   if (!request) return <div className="text-center py-20">Request not found</div>;
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpInput === request.otp) {
+      onUpdateRequest({ ...request, status: RequestStatus.COMPLETED });
+      setOtpError(false);
+    } else {
+      setOtpError(true);
+      setTimeout(() => setOtpError(false), 2000);
+    }
+  };
 
   const handleStatusChange = (newStatus: RequestStatus) => {
     onUpdateRequest({ ...request, status: newStatus });
   };
 
-  const verifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (enteredOtp === request.otp) {
-      handleStatusChange(RequestStatus.COMPLETED);
-      setEnteredOtp('');
-      setError('');
-    } else {
-      setError('Invalid OTP. Please check with the hosteler.');
-    }
+  const handleRate = (r: number) => {
+    setRating(r);
+    onUpdateRequest({ ...request, rating: r });
   };
 
-  const isInvolved = user.id === request.hostelerId || user.id === request.dayScholarId || user.role === UserRole.ADMIN;
-  const showChat = isInvolved && request.status !== RequestStatus.OPEN;
-
-  // Find users for phone numbers
-  const hostelerUser = allUsers.find(u => u.id === request.hostelerId);
-  const dayScholarUser = allUsers.find(u => u.id === request.dayScholarId);
+  const isHelper = user.id === request.campusHelperId;
+  const isHosteler = user.id === request.hostelerId;
+  const isAgentOrAdmin = user.role === UserRole.AGENT || user.role === UserRole.ADMIN;
+  const isInvolved = isHosteler || isHelper || isAgentOrAdmin;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
-      <button 
-        onClick={() => navigate('/dashboard')}
-        className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 font-medium mb-4 transition"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-        Back to Dashboard
-      </button>
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 px-4">
+      <div className="flex justify-between items-center mb-8">
+        <button onClick={() => navigate('/dashboard')} className="text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-indigo-600 transition">Back to Command Center</button>
+        <div className="flex items-center gap-2 text-rose-600 bg-rose-50 px-4 py-2 rounded-xl border border-rose-100">
+           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+           <span className="text-[10px] font-black uppercase tracking-widest">Support: 1800-UNEEDS</span>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm">
-            <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
+          {/* Main Logistics Ticket Card */}
+          <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-8 relative z-10">
               <div>
-                <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Order Details</h2>
-                <div className="flex items-center gap-2 text-gray-500">
+                <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Logistic Ticket</h2>
+                <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                     request.status === RequestStatus.COMPLETED ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-50 text-indigo-700'
                   }`}>
                     {request.status.replace('_', ' ')}
                   </span>
-                  <span className="font-mono text-xs">ID: {request.id}</span>
+                  <span className="text-[10px] text-gray-400 font-mono">ID: {request.id}</span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-3xl font-black text-indigo-600 block">₹{request.totalAmount}</span>
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Escrow Hold</p>
+                <span className="text-3xl font-black text-indigo-600">₹{request.totalAmount}</span>
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Escrow Payment Locked</p>
               </div>
             </div>
 
-            <div className="space-y-8">
-              <div className="border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
+            <div className="space-y-8 relative z-10">
+              <div className="border border-gray-100 rounded-3xl overflow-hidden bg-gray-50/50">
                 <table className="w-full text-left">
-                  <thead className="bg-gray-50 border-b border-gray-100">
+                  <thead className="bg-gray-100/50 border-b border-gray-100">
                     <tr>
-                      <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">Item Name</th>
+                      <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">Item</th>
                       <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">Qty</th>
-                      <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Est. Cost</th>
+                      <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-100">
                     {request.items.map((itm, i) => (
-                      <tr key={i} className="hover:bg-gray-50/30 transition-colors">
+                      <tr key={i} className="hover:bg-white transition-colors">
                         <td className="px-6 py-4 text-sm font-bold text-gray-700">{itm.name}</td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-500">{itm.quantity}</td>
                         <td className="px-6 py-4 text-sm font-black text-gray-900 text-right">₹{itm.estimatedPrice * itm.quantity}</td>
@@ -97,39 +102,25 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ user, allUsers, request
                 </table>
               </div>
 
-              <div>
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Delivery Instructions</h4>
-                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                  <p className="text-sm text-gray-600 leading-relaxed font-medium">{request.description}</p>
+              {request.status !== RequestStatus.COMPLETED && request.status !== RequestStatus.CANCELLED && (
+                <div className="flex flex-wrap gap-2 pt-4">
+                  {isHelper && request.status === RequestStatus.ACCEPTED && (
+                    <button onClick={() => handleStatusChange(RequestStatus.PICKED_UP)} className="px-6 py-3 bg-indigo-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-800 transition shadow-lg shadow-indigo-100">Pick Up Items</button>
+                  )}
+                  {isHelper && request.status === RequestStatus.PICKED_UP && (
+                    <button onClick={() => handleStatusChange(RequestStatus.DELIVERED)} className="px-6 py-3 bg-indigo-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-800 transition shadow-lg shadow-indigo-100">Mark as Arrived</button>
+                  )}
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Base Total</p>
-                   <p className="text-sm font-black text-gray-900">₹{request.baseAmount}</p>
-                 </div>
-                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">UNEEDS Fee</p>
-                   <p className="text-sm font-black text-gray-900">₹{request.serviceCharge}</p>
-                 </div>
-                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Scholar Tip</p>
-                   <p className="text-sm font-black text-indigo-600">₹{request.tip}</p>
-                 </div>
-                 <div className="p-4 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
-                   <p className="text-[9px] font-black text-indigo-200 uppercase tracking-widest mb-1">Grand Total</p>
-                   <p className="text-sm font-black text-white">₹{request.totalAmount}</p>
-                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {showChat && (
+          {/* Chat Component */}
+          {isInvolved && request.status !== RequestStatus.OPEN && (
             <ChatComponent 
               user={user} 
               requestId={request.id} 
-              otp={request.otp} // Passing OTP as session salt
+              otp={request.otp} 
               messages={messages} 
               onSendMessage={onSendMessage} 
             />
@@ -137,111 +128,69 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ user, allUsers, request
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Contact Directory</h3>
-            <div className="space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center font-black text-indigo-600 text-lg">
-                  {request.hostelerName.charAt(0)}
-                </div>
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-black text-gray-800">{request.hostelerName}</p>
-                    <span className="text-[8px] font-black uppercase text-indigo-400 bg-indigo-50 px-1.5 py-0.5 rounded">Hosteler</span>
-                  </div>
-                  {(request.status !== RequestStatus.OPEN && isInvolved) && (
-                    <p className="text-xs font-bold text-gray-500 mt-0.5">{hostelerUser?.phoneNumber || '+91 XXXXX XXXXX'}</p>
-                  )}
-                </div>
-              </div>
+          {/* Completion OTP Field for Campus Helper */}
+          {isHelper && (request.status === RequestStatus.DELIVERED || request.status === RequestStatus.PICKED_UP) && (
+            <div className="bg-emerald-50 rounded-[2.5rem] p-8 border-2 border-emerald-500 shadow-xl shadow-emerald-100 animate-in zoom-in-95 duration-500">
+              <h3 className="text-xl font-black text-emerald-900 mb-2 tracking-tight">Verify Delivery</h3>
+              <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mb-6">Enter OTP from User or Agent</p>
               
-              <div className="flex items-center gap-4">
-                {request.dayScholarName ? (
-                  <>
-                    <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center font-black text-emerald-600 text-lg">
-                      {request.dayScholarName.charAt(0)}
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-black text-gray-800">{request.dayScholarName}</p>
-                        <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-50 px-1.5 py-0.5 rounded">Scholar</span>
-                      </div>
-                      {isInvolved && (
-                        <p className="text-xs font-bold text-gray-500 mt-0.5">{dayScholarUser?.phoneNumber || '+91 XXXXX XXXXX'}</p>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-4 w-full">
-                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center font-black text-gray-300">?</div>
-                    <p className="text-xs font-bold text-gray-400 italic">Waiting for connection...</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {user.role === UserRole.HOSTELER && request.status !== RequestStatus.COMPLETED && (
-            <div className="bg-indigo-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
-              <h3 className="text-lg font-black mb-1 tracking-tight">Delivery Verification</h3>
-              <p className="text-indigo-300 text-[10px] font-bold uppercase tracking-widest mb-6">Security OTP Protocol</p>
-              
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl py-10 text-center border border-white/10">
-                <span className="text-5xl font-mono font-black tracking-[0.4em] pl-[0.4em]">{request.otp}</span>
-              </div>
-              <p className="text-[9px] text-indigo-400 mt-6 text-center font-black uppercase tracking-widest leading-relaxed">
-                Release this code only after verifying <br/> the item's condition and quantity.
-              </p>
-            </div>
-          )}
-
-          {user.role === UserRole.DAY_SCHOLAR && request.status === RequestStatus.ACCEPTED && (
-             <button 
-              onClick={() => handleStatusChange(RequestStatus.DELIVERED)}
-              className="w-full py-5 bg-indigo-900 text-white rounded-[2rem] font-black text-lg hover:bg-indigo-800 transition shadow-xl shadow-indigo-100 active:scale-95"
-            >
-              Confirm Pick-up & Arrived
-            </button>
-          )}
-
-          {user.role === UserRole.DAY_SCHOLAR && request.status === RequestStatus.DELIVERED && (
-            <div className="bg-white rounded-[2.5rem] p-8 border-2 border-indigo-600 shadow-xl">
-              <h3 className="text-xl font-black mb-2 tracking-tight">Handover Complete</h3>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-6">Enter Hosteler's OTP</p>
-              <form onSubmit={verifyOtp} className="space-y-6">
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <input 
-                  type="text" maxLength={4}
-                  className="w-full px-5 py-5 rounded-2xl bg-gray-50 border border-transparent outline-none focus:bg-white focus:border-indigo-600 text-center text-4xl font-mono font-black"
-                  value={enteredOtp}
-                  onChange={e => setEnteredOtp(e.target.value)}
+                  type="text" 
+                  maxLength={4}
                   placeholder="0000"
+                  className={`w-full text-center py-5 rounded-2xl bg-white border-2 font-mono text-3xl font-black tracking-[0.5em] focus:ring-4 transition-all outline-none ${
+                    otpError ? 'border-rose-500 ring-rose-50 text-rose-500 animate-shake' : 'border-emerald-100 focus:border-emerald-500 ring-emerald-50 text-emerald-900'
+                  }`}
+                  value={otpInput}
+                  onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
                 />
-                {error && <p className="text-red-500 text-[10px] font-black uppercase text-center">{error}</p>}
-                <button type="submit" className="w-full py-5 bg-emerald-500 text-white rounded-[2rem] font-black text-lg hover:bg-emerald-600 transition shadow-xl shadow-emerald-100 active:scale-95">
-                  Authorize Release
+                <button 
+                  type="submit"
+                  disabled={otpInput.length !== 4}
+                  className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition disabled:opacity-20"
+                >
+                  Verify & Get Paid
                 </button>
               </form>
             </div>
           )}
 
-          <div className="p-6 bg-rose-50 rounded-[2rem] border border-rose-100 flex flex-col gap-3">
-             <div className="flex items-center gap-3">
-               <div className="w-8 h-8 bg-rose-200 rounded-xl flex items-center justify-center text-rose-600">
-                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-               </div>
-               <h4 className="text-rose-900 font-black text-xs uppercase tracking-widest">Help & Mediation</h4>
-             </div>
-             <p className="text-rose-700 text-[10px] font-medium leading-relaxed">
-               Facing misbehavior, wrong items, or pricing disputes? Raising a dispute alerts our 24/7 admin team.
-             </p>
-             <button 
-               onClick={() => handleStatusChange(RequestStatus.DISPUTED)}
-               className="text-indigo-600 font-black text-[10px] uppercase tracking-widest hover:underline self-start"
-             >
-               Raise Official Dispute
-             </button>
+          {/* Network Identities Card */}
+          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Network Entities</h3>
+            <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center font-black text-indigo-600">{request.hostelerName[0]}</div>
+                <div>
+                  <p className="text-sm font-black text-gray-800">{request.hostelerName}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Hosteler</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center font-black text-emerald-600">{request.campusHelperName ? request.campusHelperName[0] : '?'}</div>
+                <div>
+                  <p className="text-sm font-black text-gray-800">{request.campusHelperName || 'Connecting...'}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Campus Helper</p>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* OTP Section for Agent/Hosteler */}
+          {(isHosteler || isAgentOrAdmin) && (
+            <div className="bg-indigo-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-100">
+               <h3 className="text-lg font-black mb-1 tracking-tight">Security Handshake</h3>
+               <p className="text-indigo-300 text-[10px] font-bold uppercase tracking-widest mb-6">Mediated Exchange</p>
+               <div className="bg-white/10 rounded-2xl p-6 text-center border border-white/10">
+                 <p className="text-[10px] font-bold text-indigo-200 uppercase mb-2">Secret Verification OTP</p>
+                 <span className="text-4xl font-mono font-black tracking-[0.2em]">{request.otp}</span>
+               </div>
+               <p className="text-[9px] text-indigo-400 mt-6 text-center font-black uppercase tracking-widest leading-relaxed">
+                 {isHosteler ? "Share this with the Helper or Agent only when items are received." : "Provide this OTP to the Helper to complete the delivery."}
+               </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

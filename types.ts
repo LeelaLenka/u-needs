@@ -1,7 +1,8 @@
 
 export enum UserRole {
   HOSTELER = 'HOSTELER',
-  DAY_SCHOLAR = 'DAY_SCHOLAR',
+  CAMPUS_HELPER = 'CAMPUS_HELPER',
+  AGENT = 'AGENT',
   ADMIN = 'ADMIN'
 }
 
@@ -22,7 +23,7 @@ export interface NotificationPreferences {
   emailAlerts: boolean;
 }
 
-export type TransactionType = 'deposit' | 'withdrawal' | 'earning' | 'payment' | 'refund';
+export type TransactionType = 'deposit' | 'withdrawal' | 'appreciation' | 'payment' | 'refund';
 
 export interface Transaction {
   id: string;
@@ -55,7 +56,7 @@ export interface User {
   section?: string;
   year?: string;
   walletBalance: number;
-  totalEarnings?: number;
+  totalAppreciation?: number;
   notificationPreferences?: NotificationPreferences;
 }
 
@@ -69,8 +70,8 @@ export interface DeliveryRequest {
   id: string;
   hostelerId: string;
   hostelerName: string;
-  dayScholarId?: string;
-  dayScholarName?: string;
+  campusHelperId?: string;
+  campusHelperName?: string;
   items: ItemEntry[];
   description: string;
   baseAmount: number;
@@ -82,6 +83,8 @@ export interface DeliveryRequest {
   createdAt: string;
   location: { lat: number; lng: number; address: string };
   paymentReleased?: boolean;
+  estimatedDeliveryTime?: string;
+  rating?: number;
 }
 
 export interface ChatMessage {

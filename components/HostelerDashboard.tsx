@@ -19,6 +19,8 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
   const [tip, setTip] = useState<number>(0);
   const [error, setError] = useState('');
 
+  const PROHIBITED_ITEMS = ['alcohol', 'liquor', 'wine', 'beer', 'cigarette', 'vape', 'smoke', 'drug', 'weed', 'cannabis', 'hookah'];
+
   if (!user.profileComplete) {
     return <ProfileSetup user={user} onComplete={onUpdateProfile} />;
   }
@@ -27,6 +29,11 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
   const baseAmount = itemsList.reduce((sum, itm) => sum + (itm.estimatedPrice * itm.quantity), 0);
   const serviceCharge = Math.ceil(baseAmount * 0.1);
   const totalAmount = baseAmount + serviceCharge + tip;
+
+  const checkProhibited = (name: string) => {
+    const lowName = name.toLowerCase();
+    return PROHIBITED_ITEMS.some(p => lowName.includes(p));
+  };
 
   const handleNumItemsChange = (n: number) => {
     const val = Math.max(1, Math.min(10, n));
@@ -52,8 +59,15 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
     e.preventDefault();
     setError('');
 
+    for (const item of itemsList) {
+      if (checkProhibited(item.name)) {
+        setError(`Item "${item.name}" is restricted. Alchol, Cigarettes, and illegal substances are not allowed on UNEEDS.`);
+        return;
+      }
+    }
+
     if (user.walletBalance < totalAmount) {
-      setError(`Insufficient balance. Please add at least ₹${(totalAmount - user.walletBalance).toFixed(2)} to your wallet.`);
+      setError(`Insufficient balance. Please top-up ₹${(totalAmount - user.walletBalance).toFixed(2)} to continue.`);
       return;
     }
 
@@ -78,7 +92,7 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
       setIsModalOpen(false);
       resetForm();
     } else {
-      setError('Transaction failed. Please try again.');
+      setError('Transaction failed. Contact UNEEDS Support.');
     }
   };
 
@@ -94,11 +108,11 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-black text-gray-900 tracking-tight">Hosteler Dashboard</h2>
-          <p className="text-gray-500 font-medium">Manage your campus requests on UNEEDS</p>
+          <p className="text-gray-500 font-medium">Connect with Campus Helpers on UNEEDS</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="bg-white border-2 border-indigo-50 px-5 py-2.5 rounded-2xl text-sm font-black shadow-sm">
-            <span className="text-gray-400 mr-2 uppercase tracking-tighter">Wallet:</span>
+            <span className="text-gray-400 mr-2 uppercase tracking-tighter">Balance:</span>
             <span className="text-indigo-900">₹{user.walletBalance.toFixed(2)}</span>
           </div>
           <button 
@@ -106,37 +120,41 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
             className="bg-indigo-900 text-white px-8 py-3.5 rounded-2xl font-black flex items-center gap-2 hover:bg-indigo-800 transition shadow-xl shadow-indigo-100 active:scale-95"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-            Raise New Ticket
+            Raise New Request
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Active Requests</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Live Requests</p>
           <p className="text-4xl font-black text-indigo-900 tracking-tighter">{myRequests.filter(r => r.status !== RequestStatus.COMPLETED).length}</p>
         </div>
-        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Spent</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform Spend</p>
           <p className="text-4xl font-black text-gray-900 tracking-tighter">₹{myRequests.reduce((sum, r) => sum + r.totalAmount, 0)}</p>
         </div>
-        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm group">
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">In Escrow</p>
-          <p className="text-4xl font-black text-orange-500 tracking-tighter">₹{myRequests.filter(r => r.status !== RequestStatus.COMPLETED && r.status !== RequestStatus.CANCELLED).reduce((sum, r) => sum + r.totalAmount, 0)}</p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Agent Support</p>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <p className="text-xs font-bold text-gray-600">Agents Online</p>
+          </div>
         </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-gray-50 shadow-sm overflow-hidden">
-        <div className="p-8 border-b bg-gray-50/50">
-          <h3 className="font-black text-2xl tracking-tight">My Active Logistics</h3>
+        <div className="p-8 border-b bg-gray-50/50 flex justify-between items-center">
+          <h3 className="font-black text-2xl tracking-tight">Active Campus Logistics</h3>
+          <div className="flex items-center gap-2 text-rose-600 bg-rose-50 px-4 py-2 rounded-xl">
+             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+             <span className="text-[10px] font-black uppercase tracking-widest">Customer Care: 1800-UNEEDS</span>
+          </div>
         </div>
         <div className="p-8">
           {myRequests.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                 <svg className="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-              </div>
-              <p className="text-gray-400 font-bold italic">You haven't raised any delivery tickets yet.</p>
+            <div className="text-center py-20 text-gray-400">
+              <p className="font-bold italic">No active requests. Start by clicking "Raise New Request".</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -151,21 +169,21 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
           <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b flex justify-between items-center bg-indigo-900 text-white rounded-t-[2.5rem] sticky top-0">
-              <h3 className="text-2xl font-black tracking-tight">New Delivery Ticket</h3>
+            <div className="p-8 border-b flex justify-between items-center bg-indigo-900 text-white rounded-t-[2.5rem]">
+              <h3 className="text-2xl font-black tracking-tight">Raise New Request</h3>
               <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/10 p-3 rounded-2xl transition">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[70vh] overflow-y-auto">
               {error && (
-                <div className="bg-red-50 text-red-600 p-5 rounded-2xl text-xs font-black border border-red-100 uppercase tracking-widest">
+                <div className="bg-rose-50 text-rose-600 p-5 rounded-2xl text-xs font-black border border-rose-100 uppercase tracking-widest">
                   {error}
                 </div>
               )}
 
               <div className="space-y-2">
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Unique items count?</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">How many different items?</label>
                 <input 
                   type="number" 
                   min="1" max="10"
@@ -181,7 +199,7 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
                     <div className="md:col-span-1 space-y-1">
                       <label className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Item {idx + 1}</label>
                       <input 
-                        required type="text" placeholder="Item Name"
+                        required type="text" placeholder="e.g. Biryani"
                         className="w-full px-4 py-2.5 rounded-xl border border-transparent focus:border-uneeds-u bg-white text-sm font-medium outline-none transition"
                         value={itm.name}
                         onChange={e => updateItem(idx, 'name', e.target.value)}
@@ -210,38 +228,26 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Delivery Tip (₹)</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Appreciation Tip (₹)</label>
                 <input 
-                  type="number" 
-                  min="0"
+                  type="number" min="0"
                   className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
                   value={tip}
                   onChange={e => setTip(parseFloat(e.target.value) || 0)}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Instructions</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Mention delivery specifics or landmark..."
-                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-uneeds-u outline-none transition text-gray-600 font-medium"
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                />
-              </div>
-
               <div className="bg-indigo-50/50 p-8 rounded-[2rem] border border-indigo-100 space-y-4">
                 <div className="flex justify-between text-sm font-bold text-indigo-900">
-                  <span className="opacity-60">Estimated Base Cost</span>
+                  <span className="opacity-60">Estimated Bill</span>
                   <span>₹{baseAmount}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-indigo-900">
-                  <span className="opacity-60">Service Charge (10%)</span>
+                  <span className="opacity-60">Service & Insurance (10%)</span>
                   <span>₹{serviceCharge}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-indigo-900">
-                  <span className="opacity-60">Incentive Tip</span>
+                  <span className="opacity-60">Helper Appreciation</span>
                   <span>₹{tip}</span>
                 </div>
                 <div className="flex justify-between text-xl font-black text-indigo-900 pt-4 border-t border-indigo-200">
@@ -250,11 +256,8 @@ const HostelerDashboard: React.FC<HostelerDashboardProps> = ({ user, requests, o
                 </div>
               </div>
 
-              <button 
-                type="submit"
-                className="w-full py-5 bg-indigo-900 text-white rounded-2xl font-black text-lg hover:bg-indigo-800 transition shadow-2xl shadow-indigo-100 active:scale-95"
-              >
-                Release to Escrow (₹{totalAmount})
+              <button type="submit" className="w-full py-5 bg-indigo-900 text-white rounded-2xl font-black text-lg hover:bg-indigo-800 transition active:scale-95 shadow-xl shadow-indigo-100">
+                Confirm Request
               </button>
             </form>
           </div>
