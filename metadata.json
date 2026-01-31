@@ -1,0 +1,7 @@
+{
+  "name": "Copy of YOU NEEDS - Campus Peer Assistance",
+  "description": "A secure peer-to-peer platform connecting hostelers with day scholars for essential deliveries within college campuses.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
