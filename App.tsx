@@ -86,15 +86,30 @@ const App: React.FC = () => {
     if (!req.campusHelperId) return;
     
     const appreciation = req.tip + (req.serviceCharge * 0.8);
-    const totalPayout = req.baseAmount + appreciation;
+    let totalPayout = req.baseAmount + appreciation;
+    
+    // Weekly Bonus Logic: 25 requests per week = ₹250 bonus
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    // Count how many orders this helper completed in the last 7 days
+    // We add 1 because this current request is about to be counted as COMPLETED
+    const weeklyCount = requests.filter(r => 
+      r.campusHelperId === req.campusHelperId && 
+      r.status === RequestStatus.COMPLETED && 
+      new Date(r.createdAt) > oneWeekAgo
+    ).length + 1;
+
+    const hasReachedBonus = weeklyCount > 0 && weeklyCount % 25 === 0;
+    const bonusAmount = hasReachedBonus ? 250 : 0;
     
     setAllUsers(prev => {
       const updatedList = prev.map(u => {
         if (u.id === req.campusHelperId) {
           const updated = { 
             ...u, 
-            walletBalance: u.walletBalance + totalPayout, 
-            totalAppreciation: (u.totalAppreciation || 0) + appreciation 
+            walletBalance: u.walletBalance + totalPayout + bonusAmount, 
+            totalAppreciation: (u.totalAppreciation || 0) + appreciation + bonusAmount 
           };
           if (currentUser?.id === u.id) {
             setTimeout(() => setCurrentUser(updated), 0);
@@ -107,6 +122,10 @@ const App: React.FC = () => {
     });
 
     addTransaction(req.campusHelperId, 'appreciation', totalPayout, `Payout for Order #${req.id} (₹${appreciation.toFixed(2)} Appreciation earned)`);
+    
+    if (hasReachedBonus) {
+      addTransaction(req.campusHelperId, 'appreciation', bonusAmount, `Weekly Performance Bonus: ₹250 awarded for ${weeklyCount} completions!`);
+    }
   };
 
   const updateRequest = (updated: DeliveryRequest) => {

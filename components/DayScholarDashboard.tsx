@@ -24,6 +24,19 @@ const DayScholarDashboard: React.FC<DayScholarDashboardProps> = ({ user, request
   const myActive = requests.filter(r => r.campusHelperId === user.id && r.status !== RequestStatus.COMPLETED);
   const myCompleted = requests.filter(r => r.campusHelperId === user.id && r.status === RequestStatus.COMPLETED);
 
+  // Bonus Calculation
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const completedThisWeek = requests.filter(r => 
+    r.campusHelperId === user.id && 
+    r.status === RequestStatus.COMPLETED && 
+    new Date(r.createdAt) > oneWeekAgo
+  ).length;
+
+  const bonusGoal = 25;
+  const bonusProgress = (completedThisWeek % bonusGoal);
+  const progressPercent = (bonusProgress / bonusGoal) * 100;
+
   const displayedRequests = filter === 'OPEN' ? openRequests : filter === 'MY_ACTIVE' ? myActive : myCompleted;
 
   const handleAcceptJob = (req: DeliveryRequest) => {
@@ -49,14 +62,27 @@ const DayScholarDashboard: React.FC<DayScholarDashboardProps> = ({ user, request
           <h2 className="text-4xl font-black text-gray-900 tracking-tight">Helper Command</h2>
           <p className="text-gray-500 font-medium">Earn peer appreciation for campus deliveries</p>
         </div>
-        <div className="flex gap-4">
-          <div className="bg-indigo-900 border-2 border-indigo-900 px-6 py-4 rounded-[2rem] shadow-xl shadow-indigo-100 flex flex-col items-center min-w-[160px]">
-            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Wallet Balance</p>
+        <div className="flex flex-wrap gap-4">
+          <div className="bg-indigo-900 border-2 border-indigo-900 px-6 py-4 rounded-[2rem] shadow-xl shadow-indigo-100 flex flex-col items-center min-w-[140px]">
+            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Wallet</p>
             <p className="text-2xl font-black text-white">₹{user.walletBalance.toFixed(2)}</p>
           </div>
-          <div className="bg-emerald-50 border-2 border-emerald-100 px-6 py-4 rounded-[2rem] shadow-sm flex flex-col items-center min-w-[160px]">
+          <div className="bg-emerald-50 border-2 border-emerald-100 px-6 py-4 rounded-[2rem] shadow-sm flex flex-col items-center min-w-[140px]">
             <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Appreciation</p>
             <p className="text-2xl font-black text-emerald-700">₹{(user.totalAppreciation || 0).toFixed(2)}</p>
+          </div>
+          
+          {/* Weekly Bonus Widget */}
+          <div className="bg-white border-2 border-indigo-50 px-6 py-4 rounded-[2rem] shadow-sm flex flex-col min-w-[200px] relative overflow-hidden group">
+            <div className="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-1000" style={{ width: `${progressPercent}%` }}></div>
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Weekly Bonus</p>
+              <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">₹250 REWARD</span>
+            </div>
+            <div className="flex items-end justify-between">
+              <p className="text-2xl font-black text-gray-900">{bonusProgress}<span className="text-gray-300 text-lg">/{bonusGoal}</span></p>
+              <p className="text-[9px] font-black text-indigo-400 uppercase mb-1">Orders This Week</p>
+            </div>
           </div>
         </div>
       </div>
